@@ -14,3 +14,20 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 application = get_wsgi_application()
+
+# ====== كود مؤقت لإنشاء Superuser ======
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser(
+            username="admin",
+            password="admin123",
+            email="admin@example.com"
+        )
+        print("✅ تم إنشاء المستخدم الإداري admin/admin123")
+    else:
+        print("ℹ️ المستخدم الإداري موجود بالفعل")
+except Exception as e:
+    print(f"⚠️ خطأ أثناء إنشاء المستخدم الإداري: {e}")
+# ====== نهاية الكود المؤقت ======
