@@ -42,7 +42,13 @@ class DishViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.all()
     serializer_class = DishSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser] 
+    parser_classes = [MultiPartParser, FormParser]
+
+    # تمرير request للـ Serializer
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
     def perform_create(self, serializer):
         if not self.request.user.is_chef:
@@ -84,4 +90,5 @@ class DishViewSet(viewsets.ModelViewSet):
             dish.save()
             return Response({'status': 'quantity decreased', 'quantity': dish.quantity})
         return Response({'error': 'Quantity is already zero'}, status=400)
+
 

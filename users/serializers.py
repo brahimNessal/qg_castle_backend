@@ -15,8 +15,11 @@ class DishSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         if obj.image and hasattr(obj.image, 'url'):
+            url = obj.image.url
             request = self.context.get('request')
-            if request is not None:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
+            
+            # إذا الرابط مش كامل، يكمله بالـ domain
+            if request and not url.startswith('http'):
+                url = request.build_absolute_uri(url)
+            return url
         return None
