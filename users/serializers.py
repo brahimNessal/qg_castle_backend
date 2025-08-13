@@ -14,6 +14,9 @@ class DishSerializer(serializers.ModelSerializer):
         return obj.chef.username
 
     def get_image_url(self, obj):
-        if obj.image:
+        if obj.image and hasattr(obj.image, 'url'):
+            request = self.context.get('request')
+            if request is not None:
+                return request.build_absolute_uri(obj.image.url)
             return obj.image.url
         return None

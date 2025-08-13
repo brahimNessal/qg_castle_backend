@@ -110,11 +110,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # هذا سيقرأ القيم تلقائياً من CLOUDINARY_URL في Render أو بيئتك المحلية
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUD_NAME', 'djc2awtha'),  # اسم الحساب
-    'API_KEY': os.environ.get('API_KEY', '816521694517289'),
-    'API_SECRET': os.environ.get('API_SECRET', 'uJlKVNpjmZngmFmLIxyJ2CoYT80'),
-}
+cloudinary.config(
+    cloudinary_url=os.environ.get('CLOUDINARY_URL')
+)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
