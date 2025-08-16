@@ -8,6 +8,10 @@ from rest_framework.decorators import api_view, action
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.viewsets import ModelViewSet
+from .models import Ingredient
+from .serializers import IngredientSerializer
+from .permissions import IsChefForWrite, IsPurchaserForRead
 
 
 from .models import Dish
@@ -90,5 +94,36 @@ class DishViewSet(viewsets.ModelViewSet):
             dish.save()
             return Response({'status': 'quantity decreased', 'quantity': dish.quantity})
         return Response({'error': 'Quantity is already zero'}, status=400)
+    
+class IngredientViewSet(ModelViewSet):
+    queryset = Ingredient.objects.all().order_by('-created_at')
+    serializer_class = IngredientSerializer
+    permission_classes = [IsAuthenticated, IsChefForWrite, IsPurchaserForRead]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # القراءة (GET/HEAD/OPTIONS): للمسؤول عن الشراء فقط
+        if self.request.method in ('GET', 'HEAD', 'OPTIONS'):
+            if getattr(user, 'is_staff', False):      # أو is_purchaser
+                return Ingredient.objects.all().order_by('-created_at')
+            # منع الطباخ من رؤية الجدول (حسب شرطك)
+            return Ingredient.objects.none()
+
+        # الكتابة: لا نحتاج queryset خاص؛ سنعتمد على صلاحيات الكائن في التعديل/الحذف
+        return Ingredient.objects.all()
+
+    def destroy(self, request, *args, **kwargs):
+        # لا يحذف إلا مالك السجل (مغطى في IsChefForWrite.object)
+        return super().destroy(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        # لا يحدّث إلا مالك السجل
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 

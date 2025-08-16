@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Dish
+from .models import Ingredient
 
 class DishSerializer(serializers.ModelSerializer):
     chef_username = serializers.SerializerMethodField()
@@ -23,3 +24,16 @@ class DishSerializer(serializers.ModelSerializer):
                 url = request.build_absolute_uri(url)
             return url
         return None
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name', 'quantity', 'price_per_unit', 'total_price', 'chef', 'created_at']
+        read_only_fields = ['id', 'total_price', 'chef', 'created_at']
+
+    def create(self, validated_data):
+        # اربط المكوّن بالطباخ الذي أضافه
+        request = self.context['request']
+        validated_data['chef'] = request.user
+        return super().create(validated_data)
+
