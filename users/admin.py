@@ -18,21 +18,13 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ('username',)
     ordering = ('id',)
 
-    # fieldsets الأصلي فيه is_staff, is_superuser إلخ
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'is_chef', 'is_ingredient_manager')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ('Extra roles', {'fields': ('is_chef', 'is_ingredient_manager')}),
     )
 
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'is_chef', 'is_ingredient_manager', 'is_staff', 'is_superuser'),
-        }),
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        (None, {'fields': ('is_chef', 'is_ingredient_manager')}),
     )
-
 
 # تسجيل الأطباق
 @admin.register(Dish)
