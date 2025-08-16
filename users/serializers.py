@@ -1,6 +1,12 @@
 from rest_framework import serializers
+from .models import User
 from .models import Dish
 from .models import Ingredient
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'is_chef', 'is_ingredient_manager')
 
 class DishSerializer(serializers.ModelSerializer):
     chef_username = serializers.SerializerMethodField()
