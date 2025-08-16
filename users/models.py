@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 class User(AbstractUser):
     is_chef = models.BooleanField(default=False)
+    is_ingredient_manager = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
