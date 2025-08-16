@@ -12,7 +12,8 @@ from rest_framework.viewsets import ModelViewSet
 from .models import Ingredient
 from .serializers import IngredientSerializer
 from .permissions import IsChefForWrite, IsPurchaserForRead
-
+from .models import User
+from .serializers import UserSerializer
 
 from .models import Dish
 from .serializers import DishSerializer
@@ -38,9 +39,37 @@ def login_view(request):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'is_chef': user.is_chef,
+            'is_ingredient_manager': user.is_ingredient_manager  # أضف هذا
         })
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+@api_view(['GET'])
+def current_user_view(request):
+    """
+    إرجاع بيانات المستخدم الحالي
+    """
+    if not request.user.is_authenticated:
+        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+# أو باستخدام Class-based View:
+from rest_framework.views import APIView
+
+class UserMeView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'is_chef': request.user.is_chef,
+            'is_ingredient_manager': request.user.is_ingredient_manager
+        })
 
 class DishViewSet(viewsets.ModelViewSet):
     queryset = Dish.objects.all()
